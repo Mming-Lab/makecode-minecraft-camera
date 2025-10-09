@@ -15,7 +15,7 @@ A MakeCode extension for Minecraft Education Edition that turns complex camera c
   Your browser does not support the video tag.
 </video>
 
-[![Watch Demo Video](https://img.shields.io/badge/▶️_Watch_Demo-blue?style=for-the-badge)](https://mming-lab.github.io/camerablock/)
+[![Watch Demo Video](https://img.shields.io/badge/▶️_Watch_Demo-blue?style=for-the-badge)](https://mming-lab.github.io/makecode-minecraft-camera/)
 
 *Click above to see the camera blocks in action!*
 
