@@ -33,7 +33,7 @@ Minecraft Education Edition用のMakeCode拡張機能です。複雑なカメラ
 
 1. [Minecraft Education Edition MakeCodeエディタ](https://minecraft.makecode.com/)を開く
 2. **拡張機能** → **URLをインポート**をクリック
-3. 入力: `https://github.com/Mming-Lab/camerablock`
+3. 入力: `https://github.com/Mming-Lab/makecode-minecraft-camera`
 
 ## 📄 ライセンス
 

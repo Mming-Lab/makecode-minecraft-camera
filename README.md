@@ -33,7 +33,7 @@ A MakeCode extension for Minecraft Education Edition that turns complex camera c
 
 1. Open [Minecraft Education Edition MakeCode Editor](https://minecraft.makecode.com/)
 2. Click **Extensions** → **Import URL**
-3. Enter: `https://github.com/Mming-Lab/camerablock`
+3. Enter: `https://github.com/Mming-Lab/makecode-minecraft-camera`
 
 ## 📄 License
 
