@@ -19,6 +19,8 @@ A MakeCode extension for Minecraft Education Edition that turns complex camera c
 
 *Click above to see the camera blocks in action!*
 
+**Note**: This demo video uses the official world from the Building Category of the 6th [Minecraft Cup](https://minecraftcup.com/). Minecraft Cup is a global competition where children use Minecraft Education Edition to showcase their programming and creativity skills.
+
 ## ✨ Features
 
 - **Camera Presets**: First-person, third-person, and front view
