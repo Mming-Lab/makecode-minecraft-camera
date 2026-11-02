@@ -98,18 +98,16 @@ enum Easing {
     spring
 }
 
-//%  block="Camera" weight=1 color=#54bfff icon="\uf03d"
+//%  block="Camera" weight=1 color=#54bfff icon=""
 namespace Camera {
-
-    const COMMND_BASE: string = `camera @s `;
-    const FREE: string = `${COMMND_BASE} set minecraft:free`;
 
     //% block="End camera after %time seconds"
     //% time.defl=0
     //% weight=1000
     export function CameraClear(time: number): void {
         loops.pause(time * 1000)//待機
-        player.execute(`${COMMND_BASE} clear`);
+        // camera <players: target> clear
+        _camera(`clear`);
     }
 
 
@@ -117,34 +115,24 @@ namespace Camera {
     //% block="Move camera to:%pos=minecraftCreateWorldPosition"
     //% weight=990
     export function Pos(pos: Position): void {
-        const posCmd: string = `pos ${pos} `;//移動先座標
         // camera <players: target> set <preset: string> pos <position: x y z>
-        const cmd: string = `${FREE} ${posCmd}`;//コマンド
-        player.execute(cmd);//実行
+        _setFree(`pos ${pos}`);
     }
 
     //% group="Camera Angles"
     //% block="Move camera to:%pos=minecraftCreateWorldPosition| look at:%facing"
     //% weight=980
     export function FacingEntity(pos: Position, facing: TargetSelectorKind): void {
-        Pos(pos);//カメラ位置
-        const facingCmd: string = `facing ${mobs.target(facing)}`;//被写体:
-        //camera <players: target> set <preset: string> facing <lookAtEntity: target>
-        const cmd: string = `${FREE} ${facingCmd}`;//コマンド
-        //player.say(cmd);
-        player.execute(cmd);//実行
+        // camera <players: target> set <preset: string> pos <position: x y z> facing <lookAtEntity: target>
+        _setFree(`pos ${pos} facing ${mobs.target(facing)}`);
     }
 
     //% group="Camera Angles"
     //% block="Move camera to:%pos=minecraftCreateWorldPosition| look at position:%facing=minecraftCreateWorldPosition"
     //% weight=970
     export function FacingPosition(pos: Position, facing: Position): void {
-        Pos(pos);//カメラ位置
-        const facingCmd: string = `facing ${facing}`;//目標座標:
-        // camera <players: target> set <preset: string> facing <lookAtPosition: x y z>
-        const cmd: string = `${FREE} ${facingCmd}`;//コマンド
-        //player.say(cmd);
-        player.execute(cmd);//実行
+        // camera <players: target> set <preset: string> pos <position: x y z> facing <lookAtPosition: x y z>
+        _setFree(`pos ${pos} facing ${facing}`);
     }
 
     //% group="Camera Angles"
@@ -153,12 +141,8 @@ namespace Camera {
     //% yRot.min=-180 yRot.max=180
     //% weight=960
     export function Rot(pos: Position, xRot: number, yRot: number): void {
-        Pos(pos);//カメラ位置
-        const rotCmd: string = `rot ${xRot} ${yRot}`;//回転:
-        // camera <players: target> set <preset: string> rot <xRot: value> <yRot: value>
-        const cmd: string = `${FREE} ${rotCmd}`;//コマンド
-        //player.say(cmd);
-        player.execute(cmd);//実行
+        // camera <players: target> set <preset: string> pos <position: x y z> rot <xRot: value> <yRot: value>
+        _setFree(`pos ${pos} rot ${xRot} ${yRot}`);
     }
 
 
@@ -177,19 +161,8 @@ namespace Camera {
     //% isClear.shadow=toggleOnOff
     //% weight=890
     export function EasePosition(pos: Position, facing: Position, easeType: Easing, easeTime: number, isClear: boolean = true, isPause: boolean = true): void {
-        const easeCmd: string = `ease ${easeTime} ${_getEasingId(easeType)} `;//イージング
-        const posCmd: string = `pos ${pos} `;//移動先座標
-        const facingCmd: string = `facing ${facing}`;//目標座標:
         // camera <players: target> set <preset: string> ease <easeTime: float> <easeType: Easing> pos <position: x y z> facing <lookAtPosition: x y z>
-        const cmd: string = `${FREE} ${easeCmd} ${posCmd} ${facingCmd}`;//コマンド
-        //player.say(cmd);
-        player.execute(cmd);//実行
-        if (isPause) {
-            loops.pause(easeTime * 1000)//待機
-        }
-        if (isClear) {
-            CameraClear(0); //カメラワーク取消
-        }
+        _ease(`pos ${pos} facing ${facing}`, easeType, easeTime, isClear, isPause);
     }
 
     //% group="Camera Work"
@@ -205,19 +178,8 @@ namespace Camera {
     //% isClear.shadow=toggleOnOff
     //% weight=880
     export function EaseEntity(pos: Position, facing: TargetSelectorKind, easeType: Easing, easeTime: number, isClear: boolean = true, isPause: boolean = true): void {
-        const easeCmd: string = `ease ${easeTime} ${_getEasingId(easeType)} `;//イージング
-        const posCmd: string = `pos ${pos} `;//移動先座標
-        const facingCmd: string = `facing ${mobs.target(facing)}`;//被写体:
-        //camera <players: target> set <preset: string> ease <easeTime: float> <easeType: Easing> pos <position: x y z> facing <lookAtEntity: target>
-        const cmd: string = `${FREE} ${easeCmd} ${posCmd} ${facingCmd}`;//コマンド
-        //player.say(cmd);
-        player.execute(cmd);//実行
-        if (isPause) {
-            loops.pause(easeTime * 1000)//待機
-        }
-        if (isClear) {
-            CameraClear(0); //カメラワーク取消
-        }
+        // camera <players: target> set <preset: string> ease <easeTime: float> <easeType: Easing> pos <position: x y z> facing <lookAtEntity: target>
+        _ease(`pos ${pos} facing ${mobs.target(facing)}`, easeType, easeTime, isClear, isPause);
     }
 
     //% group="Camera Work"
@@ -235,19 +197,8 @@ namespace Camera {
     //% isClear.shadow=toggleOnOff
     //% weight=870
     export function EaseRot(pos: Position, xRot: number, yRot: number, easeType: Easing, easeTime: number, isClear: boolean = true, isPause: boolean = true): void {
-        const easeCmd: string = `ease ${easeTime} ${_getEasingId(easeType)} `;//イージング
-        const posCmd: string = `pos ${pos} `;//移動先座標
-        const rotCmd: string = `rot ${xRot} ${yRot}`;//回転:
         // camera <players: target> set <preset: string> ease <easeTime: float> <easeType: Easing> pos <position: x y z> rot <xRot: value> <yRot: value>
-        const cmd: string = `${FREE} ${easeCmd} ${posCmd} ${rotCmd}`;//コマンド
-        //player.say(cmd);
-        player.execute(cmd);//実行
-        if (isPause) {
-            loops.pause(easeTime * 1000)//待機
-        }
-        if (isClear) {
-            CameraClear(0); //カメラワーク取消
-        }
+        _ease(`pos ${pos} rot ${xRot} ${yRot}`, easeType, easeTime, isClear, isPause);
     }
 
     //% group="Fade"
@@ -260,15 +211,11 @@ namespace Camera {
     //% isClear.shadow=toggleOnOff
     //% weight=790
     export function fadeTime(fadeInSeconds: number, holdSeconds: number, fadeOutSeconds: number, colorCode: number, isClear: boolean): void {
-        const fadeTimeCmd: string = `fade time ${fadeInSeconds} ${holdSeconds} ${fadeOutSeconds} `
         const red = (colorCode >> 16) & 0xFF;
         const green = (colorCode >> 8) & 0xFF;
         const blue = colorCode & 0xFF;
-        const colorCmd: string = `color ${red} ${green} ${blue} `
         //camera <players: target> fade time <fadeInSeconds: float> <holdSeconds: float> <fadeOutSeconds: float> color <red: int> <green: int> <blue: int>
-        const cmd: string = `${COMMND_BASE} ${fadeTimeCmd} ${colorCmd}`;
-        //player.say(cmd);
-        player.execute(cmd);//実行
+        _camera(`fade time ${fadeInSeconds} ${holdSeconds} ${fadeOutSeconds} color ${red} ${green} ${blue}`);
         loops.pause((fadeInSeconds + holdSeconds + fadeOutSeconds) * 1000)//待機
         if (isClear) {
             CameraClear(0); //カメラワーク取消
@@ -277,7 +224,7 @@ namespace Camera {
 
     //% group="Fade"
     //% block="make color| red%red| green%green| blue%blue"
-    //% red.min=0 red.max=255 
+    //% red.min=0 red.max=255
     //% green.min=0 green.max=255
     //% blue.min=0 blue.max=255
     //% weight=780
@@ -292,30 +239,27 @@ namespace Camera {
     export function setcolors(color: number): number {
         return color;
     }
-    
+
 
     //% group="Camera Presets"
     //% block="First-person view"
     //% weight=760
     export function FirstPersonView(): void {
-        const cmd: string = `${COMMND_BASE} set minecraft:first_person`;
-        player.execute(cmd);
+        _setPreset("minecraft:first_person");
     }
 
     //% group="Camera Presets"
     //% block="Third-person view"
     //% weight=750
     export function ThirdPersonView(): void {
-        const cmd: string = `${COMMND_BASE} set minecraft:third_person`;
-        player.execute(cmd);
+        _setPreset("minecraft:third_person");
     }
 
     //% group="Camera Presets"
     //% block="Front view"
     //% weight=740
     export function FrontView(): void {
-        const cmd: string = `${COMMND_BASE} set minecraft:third_person_front`;
-        player.execute(cmd);
+        _setPreset("minecraft:third_person_front");
     }
 
 
@@ -324,9 +268,7 @@ namespace Camera {
     //% enabled.shadow=toggleOnOff
     //% weight=730
     export function SetMovement(enabled: boolean): void {
-        const state = enabled ? "enabled" : "disabled";
-        const cmd: string = `inputpermission set @s movement ${state}`;
-        player.execute(cmd);
+        _setInputPermission("movement", enabled);
     }
 
     //% group="Input Control"
@@ -334,9 +276,7 @@ namespace Camera {
     //% enabled.shadow=toggleOnOff
     //% weight=720
     export function SetCameraControl(enabled: boolean): void {
-        const state = enabled ? "enabled" : "disabled";
-        const cmd: string = `inputpermission set @s camera ${state}`;
-        player.execute(cmd);
+        _setInputPermission("camera", enabled);
     }
 
     export function _getEasingId(id: Easing) {
@@ -379,5 +319,36 @@ namespace Camera {
         }
     }
 
-  
+
+    // camera @s <args> を実行
+    function _camera(args: string): void {
+        player.execute(`camera @s ${args}`);
+    }
+
+    // free カメラに切り替えて pos / rot / facing などを指定
+    function _setFree(args: string): void {
+        _camera(`set minecraft:free ${args}`);
+    }
+
+    // free カメラをイージングで動かし、必要なら待機・カメラ終了
+    function _ease(args: string, easeType: Easing, easeTime: number, isClear: boolean, isPause: boolean): void {
+        _setFree(`ease ${easeTime} ${_getEasingId(easeType)} ${args}`);
+        if (isPause) {
+            loops.pause(easeTime * 1000)//待機
+        }
+        if (isClear) {
+            CameraClear(0); //カメラワーク取消
+        }
+    }
+
+    // camera <players: target> set <preset: string>
+    function _setPreset(preset: string): void {
+        _camera(`set ${preset}`);
+    }
+
+    // inputpermission set <targets: target> <permission: permission> <state: state>
+    function _setInputPermission(permission: string, enabled: boolean): void {
+        const state = enabled ? "enabled" : "disabled";
+        player.execute(`inputpermission set @s ${permission} ${state}`);
+    }
 }
