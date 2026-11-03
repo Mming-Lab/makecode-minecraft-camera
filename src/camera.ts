@@ -149,7 +149,7 @@ namespace Camera {
 
     //% group="Camera Work"
     //% blockId=minecraftCameraEasePosition
-    //% block="Smooth move| Camera:%pos=minecraftCreateWorldPosition| look at position:%facing=minecraftCreateWorldPosition| movement style:%easeType| time(s):%easeTime| end:%isClear|| pause:%isPause"
+    //% block="Smooth move| Camera:%pos=minecraftCreateWorldPosition| look at position:%facing=minecraftCreateWorldPosition| movement style:%easeType| time(s):%easeTime| back to my view after:%isClear|| wait until done:%isPause"
     //% easeTime.defl=3
     //% easeType.fieldEditor="gridpicker"
     //% easeType.fieldOptions.width=90
@@ -157,7 +157,7 @@ namespace Camera {
     //% easeType.fieldOptions.maxRows="6"
     //% isPause.defl=true
     //% isPause.shadow=toggleOnOff
-    //% isClear.defl=true
+    //% isClear.defl=false
     //% isClear.shadow=toggleOnOff
     //% weight=890
     export function EasePosition(pos: Position, facing: Position, easeType: Easing, easeTime: number, isClear: boolean = true, isPause: boolean = true): void {
@@ -166,7 +166,7 @@ namespace Camera {
     }
 
     //% group="Camera Work"
-    //% block="Smooth track| Camera:%pos=minecraftCreateWorldPosition| look at:%facing| movement style:%easeType| time(s):%easeTime| end:%isClear| pause:%isPause"
+    //% block="Smooth track| Camera:%pos=minecraftCreateWorldPosition| look at:%facing| movement style:%easeType| time(s):%easeTime| back to my view after:%isClear|| wait until done:%isPause"
     //% easeTime.defl=3
     //% easeType.fieldEditor="gridpicker"
     //% easeType.fieldOptions.width=90
@@ -174,7 +174,7 @@ namespace Camera {
     //% easeType.fieldOptions.maxRows="6"
     //% isPause.defl=true
     //% isPause.shadow=toggleOnOff
-    //% isClear.defl=true
+    //% isClear.defl=false
     //% isClear.shadow=toggleOnOff
     //% weight=880
     export function EaseEntity(pos: Position, facing: TargetSelectorKind, easeType: Easing, easeTime: number, isClear: boolean = true, isPause: boolean = true): void {
@@ -183,7 +183,7 @@ namespace Camera {
     }
 
     //% group="Camera Work"
-    //% block="Smooth rotate| Camera:%pos=minecraftCreateWorldPosition| up/down:%xRot left/right:%yRot| movement style:%easeType| time(s):%easeTime| end:%isClear| pause:%isPause"
+    //% block="Smooth rotate| Camera:%pos=minecraftCreateWorldPosition| up/down:%xRot left/right:%yRot| movement style:%easeType| time(s):%easeTime| back to my view after:%isClear|| wait until done:%isPause"
     //% xRot.min=-90 xRot.max=90
     //% yRot.min=-180 yRot.max=180
     //% easeTime.defl=3
@@ -193,7 +193,7 @@ namespace Camera {
     //% easeType.fieldOptions.maxRows="6"
     //% isPause.defl=true
     //% isPause.shadow=toggleOnOff
-    //% isClear.defl=true
+    //% isClear.defl=false
     //% isClear.shadow=toggleOnOff
     //% weight=870
     export function EaseRot(pos: Position, xRot: number, yRot: number, easeType: Easing, easeTime: number, isClear: boolean = true, isPause: boolean = true): void {
@@ -320,8 +320,12 @@ namespace Camera {
     }
 
 
+    // カメラコマンドを送るたびに増える番号。後から別の命令が来たかを見分けるのに使う
+    let _cameraCount = 0;
+
     // camera @s <args> を実行
     function _camera(args: string): void {
+        _cameraCount++;
         player.execute(`camera @s ${args}`);
     }
 
@@ -335,9 +339,19 @@ namespace Camera {
         _setFree(`ease ${easeTime} ${_getEasingId(easeType)} ${args}`);
         if (isPause) {
             loops.pause(easeTime * 1000)//待機
-        }
-        if (isClear) {
-            CameraClear(0); //カメラワーク取消
+            if (isClear) {
+                CameraClear(0); //カメラワーク取消
+            }
+        } else if (isClear) {
+            // 待たないときは、動き終わってから裏でカメラを終了する。
+            // その間に次のカメラ命令が来ていたら、それを消さないように終了しない
+            const count = _cameraCount;
+            loops.runInBackground(() => {
+                loops.pause(easeTime * 1000)
+                if (count == _cameraCount) {
+                    CameraClear(0);
+                }
+            });
         }
     }
 
