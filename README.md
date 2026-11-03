@@ -24,7 +24,7 @@ A MakeCode extension for Minecraft Education Edition that turns complex camera c
 ## ✨ Features
 
 - **Camera Presets**: First-person, third-person, and front view
-- **Smooth Movements**: 28 different easing animations
+- **Smooth Movements**: 32 different easing animations
 - **Input Control**: Enable/disable player and camera controls
 - **Screen Effects**: Fade effects with custom colors
 - **Visual Programming**: No commands to memorize
